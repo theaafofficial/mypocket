@@ -1,28 +1,45 @@
-# Create T3 App
+# MyPocket :file_folder:
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+## Introduction :bulb:
 
-## What's next? How do I make an app with this?
+MyPocket is a self-hosted solution to store important files and documents, such as IDs, securely and conveniently. It is currently under development :construction:, and our aim is to provide an easy-to-use platform for users to manage and access their critical documents from anywhere with confidence.
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+## Development Status :construction:
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+MyPocket is currently **under development**. We are actively working on implementing the planned features and refining the user experience.
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+## Tech Stack :rocket:
 
-## Learn More
+We are building MyPocket using the T3 Stack, which includes the following technologies:
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+- TypeScript
+- Next.js
+- tRPC
+- Cloudinary
+- Tailwind CSS
+- Firebase
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+## Features :sparkles:
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+The following features are planned for MyPocket:
 
-## How do I deploy this?
+1. Secure user authentication and authorization.
+2. Upload and store important documents, such as IDs, passports, and certificates.
+3. Organize and manage files with folders, labels, and tags.
+4. Full-text search for quick and easy retrieval of documents.
+5. Share documents securely with others using time-limited, encrypted links.
+6. Access your documents from any device, anywhere, with real-time syncing.
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+## Contributing :handshake:
+
+We welcome contributions to MyPocket! If you are interested in contributing to the development, bug fixing, or suggesting new features, please:
+
+1. Fork the repository and create your branch from the main branch.
+2. Make the desired changes or additions to the code.
+3. Commit your changes and create a pull request.
+
+We will review your submission and provide feedback. Thank you for your interest in MyPocket!
+
+## License :page_facing_up:
+
+MyPocket is licensed under the [MIT License](LICENSE).
