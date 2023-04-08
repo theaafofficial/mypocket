@@ -1,0 +1,197 @@
+import Card from "~/components/Card";
+import UploadFileModal from "~/components/UploadFileModal";
+import { extractExtension } from "~/utils/helper";
+import type { MediaType } from "~/utils/helper";
+import SeeAllCard from "~/components/SeeAllCard";
+import type { UseTRPCQueryResult } from "@trpc/react-query/shared";
+import type { FileOutput } from "~/server/api/routers/files";
+import Loader from "~/components/Loader";
+import { useEffect } from "react";
+import { useDebounce } from "usehooks-ts";
+import useState from "react-usestateref";
+import { createPDF } from "~/utils/helper";
+
+export default function PDFGenerate(
+  result: UseTRPCQueryResult<FileOutput[], unknown>,
+  MediaType: MediaType,
+  title: string,
+  uri: string,
+  whole_page: boolean
+) {
+  const [search, setSearch] = useState("");
+  const [searchResult, setSearchResult] = useState(result.data);
+  const [selectedCards, setSelectedCards, selectedCardsRef] = useState<
+    FileOutput[]
+  >([]);
+  const debouncedSearchTerm = useDebounce(search, 500);
+
+  useEffect(() => {
+    if (debouncedSearchTerm) {
+      setSearchResult(
+        result.data?.filter((doc) =>
+          doc?.original_filename
+            ?.toLowerCase()
+            .includes(debouncedSearchTerm.toLowerCase())
+        )
+      );
+    } else {
+      setSearchResult(result.data);
+    }
+  }, [debouncedSearchTerm]);
+
+  function handleCardSelect(card: FileOutput) {
+    const index = selectedCards.findIndex((c) => c.id === card.id);
+    console.log(index);
+    if (index === -1) {
+      console.log("here");
+      console.log([...selectedCards, card]);
+      setSelectedCards([...selectedCards, card]);
+    } else {
+      setSelectedCards([
+        ...selectedCards.slice(0, index),
+        ...selectedCards.slice(index + 1),
+      ]);
+    }
+  }
+
+  async function handleButtonClick() {
+    const urls = selectedCardsRef.current.map(
+      (card) => card.limited_url
+    ) as string[];
+    console.log(urls);
+    await createPDF(urls);
+  }
+
+  return (
+    <>
+      <div
+        className="px 4 m-4 flex flex-col items-center justify-between rounded-md
+bg-gray-100 py-2 sm:flex-row"
+      >
+        <h2 className="text-lg font-medium">{title}</h2>
+        <div
+          className={`mt-2 flex w-full flex-row items-center justify-around sm:mt-0 sm:w-auto`}
+        >
+          {whole_page && (
+            <div className="relative">
+              <label className="sr-only" htmlFor="search">
+                Search{" "}
+              </label>
+              <input
+                className="h-10 w-full rounded-full border-none bg-white pl-4 pr-10 text-sm shadow-sm sm:w-56"
+                id="search"
+                type="search"
+                placeholder={`Search ${title}`}
+                autoComplete="off"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+
+              <button
+                type="button"
+                className="absolute top-1/2 right-1 -translate-y-1/2 rounded-full bg-gray-50 p-2 text-gray-600 transition hover:text-gray-700"
+              >
+                <span className="sr-only">Search</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </button>
+            </div>
+          )}
+          <UploadFileModal
+            refetch={result.refetch}
+            title={`Upload ${title}`}
+            mediaType={MediaType}
+            documentType={MediaType === "Image" ? "ID" : "Document"}
+          />
+        </div>
+      </div>
+      <div
+        className={`flex flex-wrap justify-center gap-2 p-4 sm:items-start ${
+          result.isLoading || result.data?.length === 0
+            ? "sm:justify-center"
+            : "sm:justify-start"
+        }`}
+      >
+        {result.isLoading ? (
+          <div className=" place-self-center self-center justify-self-center">
+            <Loader />
+          </div>
+        ) : search.length > 0 && searchResult && searchResult?.length > 0 ? (
+          searchResult?.map((doc) => (
+            <Card
+              key={doc.id}
+              title={doc.original_filename}
+              url={doc.limited_url}
+              extension={
+                doc?.format
+                  ? doc?.format
+                  : extractExtension(doc?.public_id as string)
+              }
+              id={doc.id}
+              public_id={doc?.public_id}
+              resource_type={doc?.resource_type}
+              refetch={result.refetch}
+              isImage={MediaType === "Image"}
+              onSelect={() => handleCardSelect(doc)}
+              selected={selectedCards.some((c) => c.id === doc.id)}
+            />
+          ))
+        ) : search.length > 0 && searchResult?.length === 0 ? (
+          <div className="flex flex-col items-center justify-center">
+            <h2 className="text-lg font-medium">No {search} found</h2>
+          </div>
+        ) : (
+          result.data?.map((doc) => (
+            <Card
+              key={doc.id}
+              title={doc.original_filename}
+              url={doc.limited_url}
+              extension={
+                doc?.format
+                  ? doc?.format
+                  : extractExtension(doc?.public_id as string)
+              }
+              id={doc.id}
+              public_id={doc?.public_id}
+              resource_type={doc?.resource_type}
+              refetch={result.refetch}
+              isImage={MediaType === "Image"}
+              onSelect={() => handleCardSelect(doc)}
+              selected={selectedCards.some((c) => c.id === doc.id)}
+            />
+          ))
+        )}
+        {result.data?.length === 0 && (
+          <div className="flex flex-col items-center justify-center">
+            <h2 className="text-lg font-medium">No {title}</h2>
+          </div>
+        )}
+        {result.data?.length === 5 && !whole_page && (
+          <SeeAllCard uri={uri} title={`See All ${title}`} />
+        )}
+      </div>
+      {selectedCards.length > 0 && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <button
+            className="rounded bg-blue-500 py-2 px-4 font-bold text-white hover:bg-blue-700"
+            onClick={handleButtonClick}
+          >
+            Generate PDF of {selectedCards.length} images
+          </button>
+        </div>
+      )}
+    </>
+  );
+}
