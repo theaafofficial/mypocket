@@ -2,7 +2,7 @@ import React from "react";
 import { HiOutlineDocumentDownload } from "react-icons/hi";
 import { BiWindowOpen } from "react-icons/bi";
 import { truncate } from "~/utils/helper";
-import DocumentDeleteModal from "./DocumentDelete";
+import FileDeteteModal from "./FileDelete";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
@@ -88,7 +88,7 @@ const Card: React.FC<CardProps> = ({
             >
               <HiOutlineDocumentDownload className="h-4 w-4 sm:h-6 sm:w-6" />
             </a>
-            <DocumentDeleteModal
+            <FileDeteteModal
               id={id as string}
               public_id={public_id as string}
               resource_type={resource_type as string}
