@@ -22,6 +22,7 @@ export type File = DocumentData & {
   created_at?: Date;
   limited_url?: string;
   type?: MediaType;
+  starred?: boolean;
   id: string;
 };
 
@@ -34,18 +35,24 @@ export type FileOutput = {
   resource_type?: string;
   created_at?: Date;
   type?: MediaType;
+  starred?: boolean;
 };
+
+const FILES_DB = "files";
 
 const EXPIRES_AT = Math.floor(Date.now() / 1000) + 180;
 
 export const Router = createTRPCRouter({
   uploadFile: publicProcedure
-    .input(z.object({ metadata: z.unknown(), type: z.enum(["ID", "Document"]) }))
+    .input(
+      z.object({ metadata: z.unknown(), type: z.enum(["ID", "Document"]) })
+    )
     .mutation(async ({ input: { metadata, type } }) => {
-      const docRef = await addDoc(collection(db, "documents"), {
+      const docRef = await addDoc(collection(db, FILES_DB), {
         metadata,
         created_at: new Date(),
         type,
+        starred: false,
       });
       return docRef;
     }),
@@ -59,7 +66,7 @@ export const Router = createTRPCRouter({
     )
     .mutation(async ({ input: { id, public_id, resource_type } }) => {
       try {
-        await deleteDoc(doc(db, "documents", id));
+        await deleteDoc(doc(db, FILES_DB, id));
         await v2.uploader.destroy(
           public_id,
           {
@@ -71,6 +78,38 @@ export const Router = createTRPCRouter({
             console.log(error, result);
           }
         );
+        return true;
+      } catch (error) {
+        throw new Error("Error deleting document");
+      }
+    }),
+  deleteFiles: publicProcedure
+    .input(
+      z.array(
+        z.object({
+          id: z.string(),
+          public_id: z.string(),
+          resource_type: z.string(),
+        })
+      )
+    )
+    .mutation(async ({ input }) => {
+      try {
+        console.log(input);
+        for (const { id, public_id, resource_type } of input) {
+          await deleteDoc(doc(db, FILES_DB, id));
+          await v2.uploader.destroy(
+            public_id,
+            {
+              resource_type: resource_type,
+              invalidate: true,
+              type: "private",
+            },
+            (error, result) => {
+              console.log(error, result);
+            }
+          );
+        }
         return true;
       } catch (error) {
         throw new Error("Error deleting document");
@@ -88,13 +127,13 @@ export const Router = createTRPCRouter({
       let q;
       if (!Limit) {
         q = query(
-          collection(db, "documents"),
+          collection(db, FILES_DB),
           orderBy("created_at", "desc"),
           where("type", "==", type)
         );
       } else {
         q = query(
-          collection(db, "documents"),
+          collection(db, FILES_DB),
           orderBy("created_at", "desc"),
           limit(Limit),
           where("type", "==", type)
@@ -124,6 +163,7 @@ export const Router = createTRPCRouter({
           resource_type: doc.metadata?.resource_type,
           created_at: doc.created_at,
           type: doc.type,
+          starred: doc?.starred,
         };
       });
       return documents as FileOutput[];

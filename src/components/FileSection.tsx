@@ -10,6 +10,10 @@ import { useEffect } from "react";
 import { useDebounce } from "usehooks-ts";
 import useState from "react-usestateref";
 import { createPDF } from "~/utils/helper";
+import { api } from "~/utils/api";
+import { RotatingSquare, TailSpin } from "react-loader-spinner";
+import { MdDelete } from "react-icons/md";
+import {VscFilePdf} from "react-icons/vsc"
 export default function File(
   result: UseTRPCQueryResult<FileOutput[], unknown>,
   MediaType: MediaType,
@@ -17,6 +21,8 @@ export default function File(
   uri: string,
   whole_page: boolean
 ) {
+  const deleteFiles = api.router.deleteFiles.useMutation();
+
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState(result.data);
   const [selectedCards, setSelectedCards, selectedCardsRef] = useState<
@@ -38,19 +44,17 @@ export default function File(
     }
   }, [debouncedSearchTerm]);
   function handleCardSelect(card: FileOutput) {
-    if (MediaType === "Image") {
-      const index = selectedCards.findIndex((c) => c.id === card.id);
-      console.log(index);
-      if (index === -1) {
-        console.log("here");
-        console.log([...selectedCards, card]);
-        setSelectedCards([...selectedCards, card]);
-      } else {
-        setSelectedCards([
-          ...selectedCards.slice(0, index),
-          ...selectedCards.slice(index + 1),
-        ]);
-      }
+    const index = selectedCards.findIndex((c) => c.id === card.id);
+    console.log(index);
+    if (index === -1) {
+      console.log("here");
+      console.log([...selectedCards, card]);
+      setSelectedCards([...selectedCards, card]);
+    } else {
+      setSelectedCards([
+        ...selectedCards.slice(0, index),
+        ...selectedCards.slice(index + 1),
+      ]);
     }
   }
 
@@ -60,6 +64,20 @@ export default function File(
     ) as string[];
     console.log(urls);
     await createPDF(urls);
+  }
+  function handleDelete() {
+    const deleteFilesData = selectedCardsRef.current.map((card) => ({
+      id: card.id,
+      public_id: card.public_id as string,
+      resource_type: card.resource_type as string,
+    }));
+
+    deleteFiles.mutate(deleteFilesData, {
+      onSuccess: () => {
+        setSelectedCards([]);
+        void result.refetch();
+      },
+    });
   }
 
   return (
@@ -180,12 +198,34 @@ export default function File(
           <SeeAllCard uri={uri} title={`See All ${title}`} />
         )}
         {selectedCards.length > 0 && (
-          <div className="fixed bottom-4 right-4 z-50">
+          <div className="fixed bottom-4 right-4 z-50 flex flex-row gap-2">
+            {MediaType === "Image" && (
+              <button
+                className="rounded-md bg-gray-700 px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-600 hover:text-white"
+                onClick={handleButtonClick}
+                disabled={deleteFiles.isLoading}
+              >
+              <div className="flex flex-row items-center justify-center gap-2">
+                <VscFilePdf className="h-5 w-5" />
+                Generate PDF of {selectedCards.length} images
+              </div>
+              </button>
+            )}
             <button
-              className="rounded-md bg-gray-700 px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-600 hover:text-white"
-              onClick={handleButtonClick}
+              className="rounded-md bg-red-700 px-3 py-2 text-sm font-medium text-white hover:bg-red-600 hover:text-white"
+              onClick={handleDelete}
+              disabled={deleteFiles.isLoading}
             >
-              Generate PDF of {selectedCards.length} images
+              <div className="flex flex-row items-center justify-center gap-2">
+                {deleteFiles.isLoading ? (
+                  <TailSpin height={20} width={20} radius={2} color="#fff" />
+                ) : (
+                  <MdDelete className="h-5 w-5" />
+                )}
+                {deleteFiles.isLoading
+                  ? `Deleting ${selectedCards.length} files`
+                  : `Delete ${selectedCards.length} files`}
+              </div>
             </button>
           </div>
         )}

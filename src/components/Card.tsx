@@ -34,9 +34,7 @@ const Card: React.FC<CardProps> = ({
   const router = useRouter();
   return (
     <div
-      className={`group relative block h-36 w-36 sm:h-56 sm:w-56 ${
-        isImage ? "cursor-pointer" : ""
-      } `}
+      className={`group relative block h-36 w-36 sm:h-56 sm:w-56 cursor-pointer`}
     >
       <span
         className={`absolute inset-0 border-2 border-dashed ${
