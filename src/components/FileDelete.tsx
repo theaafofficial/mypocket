@@ -9,7 +9,7 @@ import { api } from "~/utils/api";
 import { toast } from "react-toastify";
 import { MdOutlineDelete } from "react-icons/md";
 import Loader from "./Loader";
-
+import { truncate } from "~/utils/helper";
 export interface Props {
   id: string;
   public_id: string;
@@ -40,7 +40,7 @@ const FileDeteteModal: React.FC<Props> = ({
   return (
     <>
       <button
-        className="inline-block p-1 sm:p-2 text-gray-700 hover:bg-gray-50 focus:relative"
+        className="inline-block p-1 text-gray-700 hover:bg-gray-50 focus:relative sm:p-2"
         onClick={handleOpen}
         title="Delete"
       >
@@ -49,7 +49,7 @@ const FileDeteteModal: React.FC<Props> = ({
       <Modal
         show={show}
         onClose={handleClose}
-        title={loading ? `Deleting ${filename}` : `Are you sure?`}
+        title={loading ? `Deleting ${truncate(filename, 20)}` : `Are you sure?`}
       >
         <div className="flex flex-row items-center justify-center gap-2">
           {loading ? (
