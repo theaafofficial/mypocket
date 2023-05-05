@@ -14,6 +14,9 @@ import { api } from "~/utils/api";
 import { RotatingSquare, TailSpin } from "react-loader-spinner";
 import { MdDelete } from "react-icons/md";
 import { VscFilePdf } from "react-icons/vsc";
+import { uploadToCloudinary } from "~/utils/helper";
+import { BiSave } from "react-icons/bi";
+import { useRouter } from "next/router";
 export interface FileProps {
   result: UseTRPCQueryResult<FileOutput[], unknown>;
   MediaType: MediaType;
@@ -21,15 +24,21 @@ export interface FileProps {
   uri: string;
   whole_page: boolean;
 }
-const File: React.FC<FileProps> = ({
+const FileSection: React.FC<FileProps> = ({
   result,
   MediaType,
   title,
   uri,
   whole_page,
 }) => {
+  const router = useRouter();
   const deleteFiles = api.router.deleteFiles.useMutation();
-
+  const uploadDocument = api.router.uploadFile.useMutation({
+    onSuccess: async () => {
+      await router.push("/documents");
+    },
+  });
+  const [savingPdfLoading, setSavingPdfLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState(result.data);
   const [selectedCards, setSelectedCards, selectedCardsRef] = useState<
@@ -66,12 +75,31 @@ const File: React.FC<FileProps> = ({
     }
   }
 
-  async function handleButtonClick() {
+  async function generatePDF() {
     const urls = selectedCardsRef.current.map(
       (card) => card.limited_url
     ) as string[];
     console.log(urls);
-    await createPDF(urls);
+    const pdfData = await createPDF(urls);
+    return pdfData;
+  }
+  async function openPDF() {
+    const pdfData = await generatePDF();
+    window.open(pdfData.url, "_blank");
+  }
+  async function generateAndStorePdf() {
+    setSavingPdfLoading(true);
+    const pdfData = await generatePDF();
+    const pdfFile = new File(
+      [pdfData.blob],
+      `pdf_${new Date().toLocaleString()}`
+    );
+    const res = await uploadToCloudinary(pdfFile);
+    uploadDocument.mutate({
+      metadata: res,
+      type: "Document",
+    });
+    setSavingPdfLoading(false);
   }
   function handleDelete() {
     const deleteFilesData = selectedCardsRef.current.map((card) => ({
@@ -213,16 +241,40 @@ const File: React.FC<FileProps> = ({
         {selectedCards.length > 0 && (
           <div className="fixed bottom-4 right-4 z-50 flex flex-row gap-2">
             {MediaType === "Image" && (
-              <button
-                className="rounded-md bg-gray-700 px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-600 hover:text-white"
-                onClick={handleButtonClick}
-                disabled={deleteFiles.isLoading}
-              >
-                <div className="flex flex-row items-center justify-center gap-2">
-                  <VscFilePdf className="h-5 w-5" />
-                  Generate PDF of {selectedCards.length} images
-                </div>
-              </button>
+              <>
+                <button
+                  className="rounded-md bg-gray-700 px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-600 hover:text-white"
+                  onClick={openPDF}
+                  disabled={deleteFiles.isLoading}
+                >
+                  <div className="flex flex-row items-center justify-center gap-2">
+                    <VscFilePdf className="h-5 w-5" />
+                    Generate PDF of {selectedCards.length} images
+                  </div>
+                </button>
+                <button
+                  className="hidden rounded-md bg-gray-700 px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-600 hover:text-white sm:block"
+                  onClick={generateAndStorePdf}
+                  disabled={deleteFiles.isLoading || uploadDocument.isLoading}
+                >
+                  <div className="flex flex-row items-center justify-center gap-2">
+                    {uploadDocument.isLoading || savingPdfLoading ? (
+                      <TailSpin
+                        height={20}
+                        width={20}
+                        radius={2}
+                        color="#fff"
+                      />
+                    ) : (
+                      <BiSave className="h-5 w-5" />
+                    )}
+                    {uploadDocument.isLoading || savingPdfLoading
+                      ? "Saving "
+                      : "Save "}
+                    PDF of {selectedCards.length} images
+                  </div>
+                </button>
+              </>
             )}
             <button
               className="rounded-md bg-red-700 px-3 py-2 text-sm font-medium text-white hover:bg-red-600 hover:text-white"
@@ -247,4 +299,4 @@ const File: React.FC<FileProps> = ({
   );
 };
 
-export default File;
+export default FileSection;

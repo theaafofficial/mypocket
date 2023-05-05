@@ -3,7 +3,7 @@ import Head from "next/head";
 import React, { useState } from "react";
 import { api } from "~/utils/api";
 import { useSession, getSession } from "next-auth/react";
-import File from "~/components/FileSection";
+import FileSection from "~/components/FileSection";
 const Home: NextPage = () => {
   const { data: session } = useSession();
   const document = api.router.getFiles.useQuery({
@@ -23,14 +23,14 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex min-h-screen select-none flex-col ">
-        <File
+        <FileSection
           result={document}
           MediaType="Document"
           title="Documents"
           uri="/documents"
           whole_page={false}
         />
-        <File
+        <FileSection
           result={id}
           MediaType="Image"
           title="Images"

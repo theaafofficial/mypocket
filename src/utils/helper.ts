@@ -29,6 +29,11 @@ export type MediaType =
   | "Video"
   | "Image & Video"
   | "Raw";
+
+export interface GeneratePDFData {
+  blob: Blob;
+  url: string;
+}
 function isDocument(filename: string): boolean {
   const documentExtensions = [
     ".docx",
@@ -44,7 +49,7 @@ function isDocument(filename: string): boolean {
   return documentExtensions.includes(extension);
 }
 
-const uploadToCloudinary = async (file: File): Promise<CloudinaryData> => {
+const uploadToCloudinary = async (file: File | Blob): Promise<CloudinaryData> => {
   const API_ENDPOINT = `https://api.cloudinary.com/v1_1/${
     process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME as string
   }/upload`;
@@ -92,7 +97,7 @@ function getFileTypes(mediaType: MediaType): string {
   }
 }
 
-async function createPDF(urls: string[]): Promise<void> {
+async function createPDF(urls: string[]): Promise<GeneratePDFData> {
   try {
     const pdf = new jsPDF();
     const pageWidth = pdf.internal.pageSize.getWidth();
@@ -134,9 +139,16 @@ async function createPDF(urls: string[]): Promise<void> {
 
     const pdfBlob = pdf.output("blob");
     const pdfUrl = URL.createObjectURL(pdfBlob);
-    window.open(pdfUrl, "_blank");
+    return {
+      blob: pdfBlob,
+      url: pdfUrl,
+    }
   } catch (error) {
     console.error(error);
+  }
+  return {
+    blob: new Blob(),
+    url: "",
   }
 }
 
@@ -155,4 +167,3 @@ export {
   createPDF,
   getBlobFromUrl,
 };
-
