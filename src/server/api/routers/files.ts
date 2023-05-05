@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProdecure } from "~/server/api/trpc";
 import { db } from "~/utils/firebase";
 import {
   addDoc,
@@ -11,6 +11,7 @@ import {
   where,
   orderBy,
   limit,
+  updateDoc,
 } from "firebase/firestore";
 import type { DocumentData } from "firebase/firestore";
 import type { CloudinaryData } from "~/utils/helper";
@@ -40,10 +41,10 @@ export type FileOutput = {
 
 const FILES_DB = "files";
 
-const EXPIRES_AT = Math.floor(Date.now() / 1000) + 180;
+const EXPIRES_AT = Math.floor(Date.now() / 1000) + 60 * 15; // 15 minutes
 
 export const Router = createTRPCRouter({
-  uploadFile: publicProcedure
+  uploadFile: protectedProdecure
     .input(
       z.object({ metadata: z.unknown(), type: z.enum(["ID", "Document"]) })
     )
@@ -56,7 +57,7 @@ export const Router = createTRPCRouter({
       });
       return docRef;
     }),
-  deleteFile: publicProcedure
+  deleteFile: protectedProdecure
     .input(
       z.object({
         id: z.string(),
@@ -83,7 +84,7 @@ export const Router = createTRPCRouter({
         throw new Error("Error deleting document");
       }
     }),
-  deleteFiles: publicProcedure
+  deleteFiles: protectedProdecure
     .input(
       z.array(
         z.object({
@@ -116,28 +117,55 @@ export const Router = createTRPCRouter({
       }
     }),
 
-  getFiles: publicProcedure
+  setStarredProperty: protectedProdecure
+    .input(
+      z.object({
+        id: z.string(),
+        starred: z.boolean(),
+      })
+    )
+    .mutation(async ({ input: { id, starred } }) => {
+      try {
+        await updateDoc(doc(db, FILES_DB, id), {
+          starred: starred,
+        });
+        return true;
+      } catch (error) {
+        throw new Error("Error saving to starred");
+      }
+    }),
+
+  getFiles: protectedProdecure
     .input(
       z.object({
         Limit: z.number().optional(),
-        type: z.enum(["ID", "Document"]),
+        type: z.enum(["ID", "Document"]).optional(),
+        starred: z.boolean().optional(),
       })
     )
-    .query(async ({ input: { Limit, type } }) => {
+    .query(async ({ input: { Limit, type, starred } }) => {
       let q;
-      if (!Limit) {
+      if (starred) {
         q = query(
           collection(db, FILES_DB),
           orderBy("created_at", "desc"),
-          where("type", "==", type)
+          where("starred", "==", starred)
         );
       } else {
-        q = query(
-          collection(db, FILES_DB),
-          orderBy("created_at", "desc"),
-          limit(Limit),
-          where("type", "==", type)
-        );
+        if (!Limit) {
+          q = query(
+            collection(db, FILES_DB),
+            orderBy("created_at", "desc"),
+            where("type", "==", type)
+          );
+        } else {
+          q = query(
+            collection(db, FILES_DB),
+            orderBy("created_at", "desc"),
+            limit(Limit),
+            where("type", "==", type)
+          );
+        }
       }
       const querySnapshot = await getDocs(q);
       let documents: File[] = [];

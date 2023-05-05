@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-export default NextAuth({
+import {type NextAuthOptions} from "next-auth";
+export const options: NextAuthOptions = {
   session: {
     strategy: "jwt",
     maxAge: 180,
@@ -33,4 +34,6 @@ export default NextAuth({
   },
 
   secret: process.env.NEXTAUTH_SECRET,
-});
+}
+
+export default NextAuth(options);
