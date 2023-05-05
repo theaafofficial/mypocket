@@ -13,14 +13,21 @@ import { createPDF } from "~/utils/helper";
 import { api } from "~/utils/api";
 import { RotatingSquare, TailSpin } from "react-loader-spinner";
 import { MdDelete } from "react-icons/md";
-import {VscFilePdf} from "react-icons/vsc"
-export default function File(
-  result: UseTRPCQueryResult<FileOutput[], unknown>,
-  MediaType: MediaType,
-  title: string,
-  uri: string,
-  whole_page: boolean
-) {
+import { VscFilePdf } from "react-icons/vsc";
+export interface FileProps {
+  result: UseTRPCQueryResult<FileOutput[], unknown>;
+  MediaType: MediaType;
+  title: string;
+  uri: string;
+  whole_page: boolean;
+}
+const File: React.FC<FileProps> = ({
+  result,
+  MediaType,
+  title,
+  uri,
+  whole_page,
+}) => {
   const deleteFiles = api.router.deleteFiles.useMutation();
 
   const [search, setSearch] = useState("");
@@ -42,7 +49,8 @@ export default function File(
     } else {
       setSearchResult(result.data);
     }
-  }, [debouncedSearchTerm]);
+  }, [debouncedSearchTerm, result.data]);
+
   function handleCardSelect(card: FileOutput) {
     const index = selectedCards.findIndex((c) => c.id === card.id);
     console.log(index);
@@ -84,54 +92,56 @@ export default function File(
     <>
       <div className="m-4 flex flex-col items-center justify-between rounded-md bg-gray-100 px-4 py-2 sm:flex-row">
         <h2 className="text-lg font-medium">{title}</h2>
-        <div
-          className={`mt-2 flex w-full flex-row items-center justify-around sm:mt-0 sm:w-auto`}
-        >
-          {whole_page && (
-            <div className="relative">
-              <label className="sr-only" htmlFor="search">
-                Search{" "}
-              </label>
+        {title !== "Starred" ? (
+          <div
+            className={`mt-2 flex w-full flex-row items-center justify-around sm:mt-0 sm:w-auto`}
+          >
+            {whole_page && (
+              <div className="relative">
+                <label className="sr-only" htmlFor="search">
+                  Search{" "}
+                </label>
 
-              <input
-                className="h-10 w-full rounded-full border-none bg-white pl-4 pr-10 text-sm shadow-sm sm:w-56"
-                id="search"
-                type="search"
-                placeholder={`Search ${title}`}
-                autoComplete="off"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+                <input
+                  className="h-10 w-full rounded-full border-none bg-white pl-4 pr-10 text-sm shadow-sm sm:w-56"
+                  id="search"
+                  type="search"
+                  placeholder={`Search ${title}`}
+                  autoComplete="off"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
 
-              <button
-                type="button"
-                className="absolute top-1/2 right-1 -translate-y-1/2 rounded-full bg-gray-50 p-2 text-gray-600 transition hover:text-gray-700"
-              >
-                <span className="sr-only">Search</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  stroke-width="2"
+                <button
+                  type="button"
+                  className="absolute top-1/2 right-1 -translate-y-1/2 rounded-full bg-gray-50 p-2 text-gray-600 transition hover:text-gray-700"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-              </button>
-            </div>
-          )}
-          <UploadFileModal
-            refetch={result.refetch}
-            title={`Upload ${title}`}
-            mediaType={MediaType}
-            documentType={MediaType === "Image" ? "ID" : "Document"}
-          />
-        </div>
+                  <span className="sr-only">Search</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                </button>
+              </div>
+            )}
+            <UploadFileModal
+              refetch={result.refetch}
+              title={`Upload ${title}`}
+              mediaType={MediaType}
+              documentType={MediaType === "Image" ? "ID" : "Document"}
+            />
+          </div>
+        ) : null}
       </div>
       <div
         className={`flex flex-wrap justify-center gap-2 p-4 sm:items-start ${
@@ -158,6 +168,7 @@ export default function File(
               id={doc.id}
               public_id={doc?.public_id}
               resource_type={doc?.resource_type}
+              isStarred={doc.starred}
               refetch={result.refetch}
               isImage={MediaType === "Image"}
               onSelect={() => handleCardSelect(doc)}
@@ -182,6 +193,7 @@ export default function File(
               id={doc.id}
               public_id={doc?.public_id}
               resource_type={doc?.resource_type}
+              isStarred={doc.starred}
               refetch={result.refetch}
               isImage={MediaType === "Image"}
               onSelect={() => handleCardSelect(doc)}
@@ -205,10 +217,10 @@ export default function File(
                 onClick={handleButtonClick}
                 disabled={deleteFiles.isLoading}
               >
-              <div className="flex flex-row items-center justify-center gap-2">
-                <VscFilePdf className="h-5 w-5" />
-                Generate PDF of {selectedCards.length} images
-              </div>
+                <div className="flex flex-row items-center justify-center gap-2">
+                  <VscFilePdf className="h-5 w-5" />
+                  Generate PDF of {selectedCards.length} images
+                </div>
               </button>
             )}
             <button
@@ -232,4 +244,6 @@ export default function File(
       </div>
     </>
   );
-}
+};
+
+export default File;
