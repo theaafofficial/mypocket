@@ -92,56 +92,57 @@ const File: React.FC<FileProps> = ({
     <>
       <div className="m-4 flex flex-col items-center justify-between rounded-md bg-gray-100 px-4 py-2 sm:flex-row">
         <h2 className="text-lg font-medium">{title}</h2>
-        {title !== "Starred" ? (
-          <div
-            className={`mt-2 flex w-full flex-row items-center justify-around sm:mt-0 sm:w-auto`}
-          >
-            {whole_page && (
-              <div className="relative">
-                <label className="sr-only" htmlFor="search">
-                  Search{" "}
-                </label>
 
-                <input
-                  className="h-10 w-full rounded-full border-none bg-white pl-4 pr-10 text-sm shadow-sm sm:w-56"
-                  id="search"
-                  type="search"
-                  placeholder={`Search ${title}`}
-                  autoComplete="off"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
+        <div
+          className={`mt-2 flex w-full flex-row items-center justify-around sm:mt-0 sm:w-auto`}
+        >
+          {whole_page && (
+            <div className="relative">
+              <label className="sr-only" htmlFor="search">
+                Search{" "}
+              </label>
 
-                <button
-                  type="button"
-                  className="absolute top-1/2 right-1 -translate-y-1/2 rounded-full bg-gray-50 p-2 text-gray-600 transition hover:text-gray-700"
+              <input
+                className="h-10 w-full rounded-full border-none bg-white pl-4 pr-10 text-sm shadow-sm sm:w-56"
+                id="search"
+                type="search"
+                placeholder={`Search ${title}`}
+                autoComplete="off"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+
+              <button
+                type="button"
+                className="absolute top-1/2 right-1 -translate-y-1/2 rounded-full bg-gray-50 p-2 text-gray-600 transition hover:text-gray-700"
+              >
+                <span className="sr-only">Search</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
                 >
-                  <span className="sr-only">Search</span>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                </button>
-              </div>
-            )}
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </button>
+            </div>
+          )}
+          {title !== "Starred" ? (
             <UploadFileModal
               refetch={result.refetch}
               title={`Upload ${title}`}
               mediaType={MediaType}
               documentType={MediaType === "Image" ? "ID" : "Document"}
             />
-          </div>
-        ) : null}
+          ) : null}
+        </div>
       </div>
       <div
         className={`flex flex-wrap justify-center gap-2 p-4 sm:items-start ${
