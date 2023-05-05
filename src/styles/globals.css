@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+    -webkit-tap-highlight-color: transparent;
+    
+  }
 .Toastify__toast-container {
     z-index: 200000;
 }
