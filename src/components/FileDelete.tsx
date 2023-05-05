@@ -40,11 +40,11 @@ const FileDeteteModal: React.FC<Props> = ({
   return (
     <>
       <button
-        className="inline-block p-2 sm:p-3 text-gray-700 hover:bg-gray-50 focus:relative"
+        className="inline-block p-1 sm:p-2 text-gray-700 hover:bg-gray-50 focus:relative"
         onClick={handleOpen}
         title="Delete"
       >
-        <MdOutlineDelete className="h-4 w-4 sm:h-6 sm:w-6" />
+        <MdOutlineDelete className="h-5 w-5 sm:h-6 sm:w-6" />
       </button>
       <Modal
         show={show}
