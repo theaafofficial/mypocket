@@ -5,6 +5,7 @@ import Image from "next/image";
 import { HiLogout, HiMenu } from "react-icons/hi";
 import { RxCross2 } from "react-icons/rx";
 import Link from "next/link";
+import ClickAwayListener from "react-click-away-listener";
 function Navbar() {
   const [isExpanded, setIsExpanded] = React.useState(false);
 
@@ -59,6 +60,12 @@ function Navbar() {
                 >
                   IDS
                 </Link>
+                <Link
+                  href="/starred"
+                  className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+                >
+                  Starred
+                </Link>
               </div>
             </div>
             <div className="hidden sm:flex">
@@ -74,35 +81,43 @@ function Navbar() {
       </div>
 
       {isExpanded && (
-        <div className="sm:hidden" id="mobile-menu">
-          <div className="flex flex-col px-2 pt-2 pb-3">
-            <Link
-              href="/"
-              className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-            >
-              Home
-            </Link>
-            <Link
-              href="/documents"
-              className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-            >
-              Documents
-            </Link>
-            <Link
-              href="/ids"
-              className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-            >
-              IDS
-            </Link>
-            <button
-              onClick={() => signOut()}
-              className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-            >
-              <HiLogout className="inline-block mr-2" /> 
-              Sign Out
-            </button>
+        <ClickAwayListener onClickAway={() => setIsExpanded(false)}>
+          <div className="sm:hidden" id="mobile-menu">
+            <div className="flex flex-col px-2 pt-2 pb-3">
+              <Link
+                href="/"
+                className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+              >
+                Home
+              </Link>
+              <Link
+                href="/documents"
+                className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+              >
+                Documents
+              </Link>
+              <Link
+                href="/ids"
+                className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+              >
+                IDS
+              </Link>
+              <Link
+                href="/starred"
+                className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+              >
+                Starred
+              </Link>
+              <button
+                onClick={() => signOut()}
+                className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+              >
+                <HiLogout className="mr-2 inline-block" />
+                Sign Out
+              </button>
+            </div>
           </div>
-        </div>
+        </ClickAwayListener>
       )}
     </nav>
   );
