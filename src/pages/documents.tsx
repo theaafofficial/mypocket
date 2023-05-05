@@ -9,7 +9,7 @@ const documents: NextPage = () => {
 
   return (
     <>
-      {File(document, "Document", "All documents", "/documents", true)}
+      <File result={document} MediaType="Document" title="All documents" uri="/documents" whole_page={false} />
     </>
   );
 };

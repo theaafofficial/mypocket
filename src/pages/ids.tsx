@@ -7,7 +7,17 @@ const documents: NextPage = () => {
     type: "ID",
   });
 
-  return <>{File(id, "Image", "IDS", "/ids", true)}</>;
+  return (
+    <>
+      <File
+        result={id}
+        MediaType="Image"
+        title="IDS"
+        uri="/images"
+        whole_page={false}
+      />
+    </>
+  );
 };
 
 export default documents;

@@ -1,4 +1,3 @@
-"use-client";
 import { type NextPage } from "next";
 import Head from "next/head";
 import React, { useState } from "react";
@@ -23,9 +22,21 @@ const Home: NextPage = () => {
         <meta name="description" content="My Pocket" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex min-h-screen flex-col  ">
-        {File(document, "Document", "Documents", "/documents", false)}
-        {File(id, "Image", "IDS", "/ids", false)}
+      <main className="flex min-h-screen select-none flex-col ">
+        <File
+          result={document}
+          MediaType="Document"
+          title="Documents"
+          uri="/documents"
+          whole_page={false}
+        />
+        <File
+          result={id}
+          MediaType="Image"
+          title="Images"
+          uri="/images"
+          whole_page={false}
+        />
       </main>
     </>
   );
