@@ -33,8 +33,8 @@ const Home: NextPage = () => {
         <FileSection
           result={id}
           MediaType="Image"
-          title="Images"
-          uri="/images"
+          title="IDS"
+          uri="/ids"
           whole_page={false}
         />
       </main>

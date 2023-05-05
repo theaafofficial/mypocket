@@ -71,9 +71,9 @@ const uploadToCloudinary = async (file: File | Blob): Promise<CloudinaryData> =>
 
 const extractExtension = (filename: string): string => {
   return filename
-    .slice(filename.lastIndexOf("."))
-    .toLowerCase()
-    .replace(".", "");
+    ?.slice(filename.lastIndexOf("."))
+    ?.toLowerCase()
+    ?.replace(".", "");
 };
 
 const truncate = (str: string, n: number): string => {
@@ -113,7 +113,8 @@ async function createPDF(urls: string[]): Promise<GeneratePDFData> {
       await new Promise((resolve) => {
         reader.onload = () => {
           const dataUrl = reader.result as string;
-          const img = new Image();
+          const img = new Image()
+          
           img.onload = () => {
             const { width, height } = pdf.getImageProperties(img);
             const aspectRatio = width / height;

@@ -13,7 +13,7 @@ const documents: NextPage = () => {
         result={id}
         MediaType="Image"
         title="IDS"
-        uri="/images"
+        uri="/ids"
         whole_page={false}
       />
     </>

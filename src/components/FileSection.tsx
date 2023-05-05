@@ -17,6 +17,7 @@ import { VscFilePdf } from "react-icons/vsc";
 import { uploadToCloudinary } from "~/utils/helper";
 import { BiSave } from "react-icons/bi";
 import { useRouter } from "next/router";
+import { toast } from "react-toastify";
 export interface FileProps {
   result: UseTRPCQueryResult<FileOutput[], unknown>;
   MediaType: MediaType;
@@ -90,6 +91,11 @@ const FileSection: React.FC<FileProps> = ({
   async function generateAndStorePdf() {
     setSavingPdfLoading(true);
     const pdfData = await generatePDF();
+    if(pdfData.blob.size >= 10485760){
+      toast.error("File size too large. Limit is 10MB");
+      setSavingPdfLoading(false);
+      return;
+    }
     const pdfFile = new File(
       [pdfData.blob],
       `pdf_${new Date().toLocaleString()}`

@@ -41,6 +41,7 @@ const UploadFileModal: React.FC<Props> = ({
     setShow(false);
   };
   const handleClickAway = () => {
+    if (loading) return;
     setShow(false);
   };
 
