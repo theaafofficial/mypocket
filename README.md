@@ -4,6 +4,9 @@
 
 MyPocket is a self-hosted solution to store important files and documents, such as IDs, securely and conveniently. It is currently under development :construction:, and our aim is to provide an easy-to-use platform for users to manage and access their critical documents from anywhere with confidence.
 
+## Deployemnt Guide :construction:
+Use this <a href="/Deployment README.md">Deployment Guidline</a>
+
 ## Development Status :construction:
 
 MyPocket is currently **under development**. We are actively working on implementing the planned features and refining the user experience.
