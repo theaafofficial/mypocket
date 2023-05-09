@@ -1,6 +1,6 @@
 # MyPocket Project Deployment Guide
 
-This guide will walk you through the steps to deploy the MyPocket project locally.
+This guide will walk you through the steps to deploy the MyPocket project locally and on Vercel.
 
 ## Step 1: Fork and clone the project
 
