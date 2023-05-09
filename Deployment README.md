@@ -66,7 +66,7 @@ Now that you have set up the `.env` file, you can now deploy on vercel using the
 You can run the project locally by going to project root and run following commands 
 
 ```bash
-npm install
+npm install --force
 ```
 
 Then, run the project:
