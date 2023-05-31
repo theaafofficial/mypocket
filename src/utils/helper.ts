@@ -158,6 +158,11 @@ async function getBlobFromUrl(url: string): Promise<Blob> {
   const blob = await res.blob();
   return blob;
 }
+function convertToAllCapsUnderscore(inputString: string): string {
+  const uppercaseString: string = inputString.toUpperCase();
+  const underscoreString: string = uppercaseString.replace(/ /g, '_');
+  return underscoreString;
+}
 
 export {
   isDocument,
@@ -167,4 +172,5 @@ export {
   getFileTypes,
   createPDF,
   getBlobFromUrl,
+  convertToAllCapsUnderscore
 };

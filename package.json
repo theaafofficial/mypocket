@@ -20,6 +20,7 @@
     "cloudinary": "^1.35.0",
     "crypto-js": "^4.1.1",
     "crypto-ts": "^1.0.2",
+    "daisyui": "^2.52.0",
     "firebase": "^9.18.0",
     "jsonwebtoken": "^9.0.0",
     "jspdf": "^2.5.1",

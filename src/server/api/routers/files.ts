@@ -12,6 +12,7 @@ import {
   orderBy,
   limit,
   updateDoc,
+  setDoc,
 } from "firebase/firestore";
 import type { DocumentData } from "firebase/firestore";
 import type { CloudinaryData } from "~/utils/helper";
@@ -37,6 +38,13 @@ export type FileOutput = {
   created_at?: Date;
   type?: MediaType;
   starred?: boolean;
+};
+
+export type secret = {
+  id: string;
+  secret_name: string;
+  secret_value: string;
+  created_at: Date;
 };
 
 const FILES_DB = "files";
@@ -96,7 +104,6 @@ export const Router = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       try {
-        console.log(input);
         for (const { id, public_id, resource_type } of input) {
           await deleteDoc(doc(db, FILES_DB, id));
           await v2.uploader.destroy(
@@ -195,5 +202,87 @@ export const Router = createTRPCRouter({
         };
       });
       return documents as FileOutput[];
+    }),
+
+  saveSecret: protectedProdecure
+    .input(
+      z.object({
+        secret_name: z.string(),
+        secret_value: z.string(),
+      })
+    )
+    .mutation(async ({ input: { secret_name, secret_value } }) => {
+      try {
+        await addDoc(collection(db, "secrets"), {
+          secret_name,
+          secret_value,
+          created_at: new Date(),
+        });
+        return true;
+      } catch (error) {
+        throw new Error("Error saving secret");
+      }
+    }),
+  getAllSecrets: protectedProdecure
+    .input(
+      z.object({
+        Limit: z.number().optional(),
+      })
+    )
+    .query(async ({ input: { Limit } }) => {
+      try {
+        let q;
+        if (!Limit) {
+          q = query(collection(db, "secrets"), orderBy("created_at", "desc"));
+        } else {
+          q = query(
+            collection(db, "secrets"),
+            orderBy("created_at", "desc"),
+            limit(Limit)
+          );
+        }
+        const querySnapshot = await getDocs(q);
+        const secrets: secret[] = [];
+        querySnapshot.forEach((doc) => {
+          secrets.push({ id: doc.id, ...doc.data() } as secret);
+        });
+        return secrets;
+      } catch (error) {
+        throw new Error("Error getting secrets");
+      }
+    }),
+
+  deleteSecret: protectedProdecure
+    .input(
+      z.object({
+        id: z.string(),
+      })
+    )
+    .mutation(async ({ input: { id } }) => {
+      try {
+        await deleteDoc(doc(db, "secrets", id));
+        return true;
+      } catch (error) {
+        throw new Error("Error deleting secret");
+      }
+    }),
+
+  editSecret: protectedProdecure
+    .input(
+      z.object({
+        id: z.string(),
+
+        secret_value: z.string(),
+      })
+    )
+    .mutation(async ({ input: { id, secret_value } }) => {
+      try {
+        await updateDoc(doc(db, "secrets", id), {
+          secret_value: secret_value,
+        });
+        return true;
+      } catch (error) {
+        throw new Error("Error saving to starred");
+      }
     }),
 });
